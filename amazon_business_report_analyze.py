@@ -79,6 +79,31 @@ if file:
     fig2.add_hline(y=80, line_dash="dash", line_color="red")
     c2.plotly_chart(fig2, use_container_width=True)
 
+    # Top 10 ASINs
+    st.subheader("🏆 Top 10 ASINs by Sales")
+    top10 = data.sort_values("Ordered Product Sales", ascending=False).head(10).copy()
+    top10["Sales Share %"] = (
+        top10["Ordered Product Sales"] / data["Ordered Product Sales"].sum() * 100
+    ).round(1)
+
+    t1, t2 = st.columns([3, 2])
+
+    fig3 = px.bar(top10, x="Ordered Product Sales", y="(Child) ASIN",
+                  orientation="h",
+                  hover_name="Title" if "Title" in top10.columns else None,
+                  title="Top 10 ASINs by Sales")
+    fig3.update_yaxes(autorange="reversed")
+    t1.plotly_chart(fig3, use_container_width=True)
+
+    show_cols = [c for c in ["(Child) ASIN", "Title", "Ordered Product Sales",
+                             "Sales Share %", "Units Ordered",
+                             "Unit Session Percentage",
+                             "Featured Offer (Buy Box) Percentage", "Segment"]
+                 if c in top10.columns]
+    t2.dataframe(top10[show_cols], use_container_width=True)
+
+    st.caption(f"Yeh 10 ASINs total sales ka {top10['Sales Share %'].sum():.1f}% la rahe hain.")
+
     # Fix priority
     st.subheader("⚠️ Fix Priority (potential extra sales)")
     fix = data[data["Segment"] == "Fix"].copy()
